@@ -1,2 +1,45 @@
+# Environments
 venv/
+env/
+.env
+.venv/
+cloned_projects/
+
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Streamlit
+.streamlit/
+
+# OS/Editor
+.DS_Store
+.vscode/
+.idea/
+*.swp
+*.swo
