@@ -35,7 +35,9 @@ try:
     import nltk
     from nltk.tokenize import word_tokenize
     from nltk.corpus import stopwords as nltk_stopwords
+    from nltk.corpus import wordnet
     from nltk.stem import WordNetLemmatizer
+    from nltk import pos_tag
     NLTK_AVAILABLE = True
 except ImportError:
     NLTK_AVAILABLE = False
@@ -72,15 +74,20 @@ def _ensure_nltk_data() -> None:
     """Download required NLTK data."""
     if not NLTK_AVAILABLE:
         return
-    for resource in ["punkt", "punkt_tab", "stopwords", "wordnet", "averaged_perceptron_tagger"]:
+        
+    RESOURCE_PATHS = {
+        "punkt": "tokenizers/punkt",
+        "punkt_tab": "tokenizers/punkt_tab",
+        "stopwords": "corpora/stopwords",
+        "wordnet": "corpora/wordnet",
+        "averaged_perceptron_tagger": "taggers/averaged_perceptron_tagger",
+    }
+    
+    for name, path in RESOURCE_PATHS.items():
         try:
-            nltk.data.find(f"tokenizers/{resource}")
+            nltk.data.find(path)
         except LookupError:
-            nltk.download(resource, quiet=True)
-        try:
-            nltk.data.find(f"corpora/{resource}")
-        except LookupError:
-            nltk.download(resource, quiet=True)
+            nltk.download(name, quiet=True)
 
 
 def _tokenize_tigrinya(text: str) -> List[str]:
@@ -125,9 +132,6 @@ def _lemmatize_tigrinya(tokens: List[str]) -> List[str]:
     # Identity mapping for now - Tigrinya lemmatization is research-level
     return list(tokens)
 
-
-from nltk.corpus import wordnet
-from nltk import pos_tag
 
 def _get_wordnet_pos(treebank_tag: str) -> str:
     """Map POS tag to first character used by WordNetLemmatizer"""
@@ -192,7 +196,8 @@ def _compute_distances_and_relevance(
         pos_list = positions.get(term, [0])
 
         dist_start = first / total if total > 0 else 0.0
-        dist_end = (total - last - 1) / total if total > 0 else 0.0
+        # Symmetric distance: Distance from end based on where it FIRST appears
+        dist_end = (total - first - 1) / total if total > 0 else 0.0
         dist_end = max(0.0, dist_end)
 
         avg_pos = sum(pos_list) / len(pos_list)
