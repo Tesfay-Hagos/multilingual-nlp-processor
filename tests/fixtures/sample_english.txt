@@ -1,0 +1,7 @@
+The quick brown fox jumps over the lazy dog. This sentence contains every letter of the alphabet.
+Natural language processing is a subfield of linguistics and computer science. It focuses on the interaction between computers and human language.
+The fox was very clever and agile. The fox ran quickly through the forest.
+
+Machine learning is transforming how we process text. Computers can now understand human language better than ever before.
+The weather is nice today. People enjoy walking in the park when the sun is shining.
+Education opens doors to new opportunities. Students learn many things in school every day.
