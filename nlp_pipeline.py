@@ -93,7 +93,7 @@ def _ensure_nltk_data() -> None:
         "punkt_tab": "tokenizers/punkt_tab",
         "stopwords": "corpora/stopwords",
         "wordnet": "corpora/wordnet",
-        "averaged_perceptron_tagger": "taggers/averaged_perceptron_tagger",
+        "averaged_perceptron_tagger_eng": "taggers/averaged_perceptron_tagger_eng",
     }
     for name, path in RESOURCE_PATHS.items():
         try:
@@ -167,14 +167,29 @@ def _remove_stopwords_english(tokens: List[str]) -> List[str]:
     return [t for t in tokens if t not in sw]
 
 
+# Tigrinya suffix rules: (suffix, min_stem_length)
+# Ordered longest-first to prevent partial matches
+# Note: Tigrinya is a syllabary, so a 2-character stem (e.g. ሰብ 'man', ገዛ 'house') is common and complete.
+_TIGRINYA_SUFFIXES = [
+    ("ኩም", 2), ("ኩን", 2), ("ናት", 2), ("ያት", 2), ("ታት", 2),
+    ("ዎም", 2), ("ዮ", 2), ("ዎ", 2), ("ካ", 2), ("ኪ", 2),
+    ("ኩ", 2), ("ስ", 3), ("ድ", 3),
+]
+
+def _stem_tigrinya_word(word: str) -> str:
+    """Strip common morphological suffixes."""
+    for suffix, min_stem in _TIGRINYA_SUFFIXES:
+        if word.endswith(suffix) and len(word) - len(suffix) >= min_stem:
+            return word[:-len(suffix)]
+    return word
+
 def _lemmatize_tigrinya(tokens: List[str]) -> List[str]:
     """
-    Lemmatize Tigrinya tokens.
-    Tigrinya has no standard lemmatizer; we use a simple identity/placeholder.
-    In production, a rule-based stemmer or morphological analyzer could be added.
+    Rule-based Tigrinya stemmer/lemmatizer.
+    Strips common morphological suffixes documented in Ge'ez-derived Semitic NLP.
+    Falls back to identity for unseen patterns.
     """
-    # Identity mapping for now - Tigrinya lemmatization is research-level
-    return list(tokens)
+    return [_stem_tigrinya_word(t) for t in tokens]
 
 
 def _get_wordnet_pos(treebank_tag: str) -> str:

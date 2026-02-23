@@ -63,8 +63,18 @@ class TestTigrinyaPipeline:
     def test_tigrinya_stopwords_kept_when_disabled(self):
         """When stopword removal is disabled, all tokens kept."""
         text = "ሰብ ኣብ ከተማ እዩ።"
-        r = run_pipeline(text, language="tigrinya", remove_stopwords_flag=False)
+        r = run_pipeline(text, language="tigrinya", remove_stopwords_flag=False, lemmatize_flag=False)
         assert len(r.tokens_no_stopwords) == len(r.tokens)
+
+    def test_tigrinya_lemmatization_reduces_suffixes(self):
+        """Requirement 2.2: Lemmatize Tigrinya tokens by stripping common suffixes."""
+        # ሰብካ (man + your) -> ሰብ
+        # ገዛኹም (house + your-pl) - using ኩም variant
+        text = "ሰብካ ገዛኩም"
+        r = run_pipeline(text, language="tigrinya", remove_stopwords_flag=False, lemmatize_flag=True)
+        assert "ሰብ" in r.lemmas
+        assert "ገዛ" in r.lemmas
+        assert "ሰብካ" not in r.lemmas
 
     def test_tigrinya_frequencies_computed(self):
         """Requirement 2.3: Frequencies are computed correctly."""
