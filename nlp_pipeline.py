@@ -42,6 +42,15 @@ try:
 except ImportError:
     NLTK_AVAILABLE = False
 
+# Language auto-detection
+try:
+    from langdetect import detect, LangDetectException
+    from langdetect import DetectorFactory
+    DetectorFactory.seed = 0  # Deterministic results
+    LANGDETECT_AVAILABLE = True
+except ImportError:
+    LANGDETECT_AVAILABLE = False
+
 # Module-level flag to avoid redundant NLTK data checks on every call
 _NLTK_DATA_READY = False
 
@@ -92,6 +101,37 @@ def _ensure_nltk_data() -> None:
         except LookupError:
             nltk.download(name, quiet=True)
     _NLTK_DATA_READY = True
+
+
+def _detect_language(text: str) -> str:
+    """
+    Auto-detect whether input text is Tigrinya (Ethiopic script) or English.
+
+    Strategy (in order):
+    1. Check for Ethiopic Unicode characters (U+1200–U+137F) — zero false positives,
+       no library needed, handles all Tigrinya/Amharic text.
+    2. Fall back to langdetect for Latin-script ambiguous cases.
+    3. Default to 'english' if detection fails or text is too short.
+    """
+    # Step 1: Ethiopic script check — definitive signal, fastest path
+    ethiopic_count = sum(1 for c in text if '\u1200' <= c <= '\u137F')
+    if ethiopic_count > 0:
+        return "tigrinya"
+
+    # Step 2: langdetect for Latin-script text
+    if LANGDETECT_AVAILABLE:
+        try:
+            detected = detect(text)
+            if detected == "ti":
+                return "tigrinya"
+            elif detected == "en":
+                return "english"
+            # Unknown language — fall through to default
+        except LangDetectException:
+            pass
+
+    # Step 3: Safe default
+    return "english"
 
 
 def _tokenize_tigrinya(text: str) -> List[str]:
@@ -234,7 +274,7 @@ def _compute_distances_and_relevance(
 
 def run_pipeline(
     text: str,
-    language: str = "english",
+    language: str = "auto",
     remove_stopwords_flag: bool = True,
     lemmatize_flag: bool = True,
 ) -> PipelineResult:
@@ -243,12 +283,12 @@ def run_pipeline(
 
     Args:
         text: Input text (Tigrinya or English)
-        language: "tigrinya" or "english"
-        remove_stopwords_flag: Whether to remove stopwords
-        lemmatize_flag: Whether to lemmatize
+        language: "tigrinya", "english", or "auto" (auto-detects from script/langdetect)
+        remove_stopwords_flag: Whether to remove stopwords (Req 2.1)
+        lemmatize_flag: Whether to lemmatize (Req 2.2)
 
     Returns:
-        PipelineResult with all computed statistics
+        PipelineResult with all computed statistics (Req 2.3, 2.4, 2.5)
     """
     if not text or not text.strip():
         return PipelineResult(
@@ -261,6 +301,9 @@ def run_pipeline(
             language=language,
         )
 
+    # Auto-detect language if not explicitly specified
+    if language.lower() == "auto":
+        language = _detect_language(text)
     lang = language.lower()
     if lang == "tigrinya":
         if not TIGRINYA_AVAILABLE:

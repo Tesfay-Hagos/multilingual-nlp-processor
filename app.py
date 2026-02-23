@@ -18,7 +18,10 @@ from pathlib import Path
 
 import plotly.express as px
 import plotly.graph_objects as go
-from nlp_pipeline import run_pipeline, TIGRINYA_AVAILABLE, NLTK_AVAILABLE, PipelineResult
+from nlp_pipeline import (
+    run_pipeline, TIGRINYA_AVAILABLE, NLTK_AVAILABLE, LANGDETECT_AVAILABLE,
+    PipelineResult, _detect_language
+)
 
 # Path to sample fixtures
 FIXTURES_DIR = Path(__file__).parent / "tests" / "fixtures"
@@ -30,15 +33,6 @@ def load_sample(name: str) -> str:
     if path.exists():
         return path.read_text(encoding="utf-8")
     return ""
-
-
-def _looks_like_english(text: str) -> bool:
-    """Heuristic: text is mostly ASCII/Latin (likely English) vs Ethiopic (Tigrinya)."""
-    if not text.strip():
-        return False
-    ethiopic = sum(1 for c in text if "\u1200" <= c <= "\u137f")
-    ascii_alpha = sum(1 for c in text if c.isalpha() and ord(c) < 128)
-    return ascii_alpha > ethiopic
 
 # Page config
 st.set_page_config(
@@ -186,7 +180,7 @@ with st.sidebar:
     remove_stopwords = st.checkbox("Eliminate stopwords (2.1)", True)
     lemmatize = st.checkbox("Lemmatize terms (2.2)", True)
     st.divider()
-    st.caption("Auto-detection works by analyzing the character set (Ethiopic vs Latin/ASCII).")
+    st.caption("Language is auto-detected using Ethiopic script analysis + langdetect library.")
 
 # Input
 st.subheader("📝 Input Text")
@@ -217,20 +211,18 @@ st.markdown("<br>", unsafe_allow_html=True)
 if st.button("🚀 Analyze Document", type="primary", use_container_width=True) and input_text.strip():
     with st.spinner("Processing NLP Pipeline..."):
         try:
-            # Auto-detect language if requested
-            detected_lang = "english" if _looks_like_english(input_text) else "tigrinya"
-            final_language = detected_lang if auto_detect_lang else language
-            
             result = run_pipeline(
                 input_text,
-                language=final_language,
+                language=language,
                 remove_stopwords_flag=remove_stopwords,
                 lemmatize_flag=lemmatize,
             )
-            
+
             if auto_detect_lang:
-                st.success(f"🌐 Auto-detected language: **{final_language.title()}**")
-                
+                detected = result.language
+                flag = "🌍" if detected == "tigrinya" else "🇬🇧"
+                st.success(f"{flag} Auto-detected language: **{detected.title()}**")
+
         except ImportError as e:
             st.error(f"Missing dependency: {e}")
             if "tigrinya" in str(e).lower():
@@ -243,18 +235,14 @@ if st.button("🚀 Analyze Document", type="primary", use_container_width=True) 
             st.exception(e)
             st.stop()
 
-    # Language mismatch warning (if auto-detect is OFF)
+    # Language mismatch warning (only when manually overriding)
     if not auto_detect_lang:
-        if language == "tigrinya" and _looks_like_english(input_text):
+        actual = _detect_language(input_text)
+        if actual != language:
             st.warning(
-                "⚠️ **Language mismatch:** You selected **Tigrinya** manually, but the text appears to be **English**. "
-                "Tigrinya stopwords don't include English words, so none were removed. "
-                "Enable Auto-detect or select English in the sidebar for correct processing."
-            )
-        elif language == "english" and not _looks_like_english(input_text):
-            st.warning(
-                "⚠️ **Language mismatch:** You selected **English** manually, but the text appears to be **Tigrinya**. "
-                "Enable Auto-detect or select Tigrinya in the sidebar for correct processing."
+                f"⚠️ **Language mismatch:** You selected **{language.title()}** manually, "
+                f"but the text appears to be **{actual.title()}**. "
+                "Enable Auto-detect for correct processing."
             )
 
     # Metrics
