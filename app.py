@@ -147,11 +147,28 @@ sample_options = {
     "English Sample": "sample_english.txt"
 }
 
+def load_sample_to_textarea():
+    """Callback to load sample text directly into the text area's session state."""
+    sample_file = sample_options[st.session_state["sample_dropdown"]]
+    if sample_file:
+        text = load_sample(sample_file)
+        if text:
+            st.session_state["text_area_widget"] = text
+        else:
+            st.warning(f"Sample file {sample_file} not found in tests/fixtures/")
+    else:
+        st.session_state["text_area_widget"] = ""
+
 with st.sidebar:
     st.header("⚙️ Settings & Test Data")
     
-    # Dropdown for test samples
-    selected_sample_name = st.selectbox("Load Test Sample", list(sample_options.keys()))
+    # Dropdown for test samples using on_change callback
+    selected_sample_name = st.selectbox(
+        "Load Test Sample", 
+        list(sample_options.keys()),
+        key="sample_dropdown",
+        on_change=load_sample_to_textarea
+    )
     
     st.divider()
     st.subheader("Pipeline Options")
@@ -174,34 +191,19 @@ with st.sidebar:
 # Input
 st.subheader("📝 Input Text")
 
-input_text = ""
 input_mode = st.radio("Input mode", ["Text Area", "File Upload"], horizontal=True, key="input_mode")
 
 input_text = ""
 if input_mode == "Text Area":
-    # If the user selects a DIFFERENT sample, update the session state
-    if "last_sample" not in st.session_state or st.session_state["last_sample"] != selected_sample_name:
-        st.session_state["last_sample"] = selected_sample_name
-        
-        sample_file = sample_options[selected_sample_name]
-        if sample_file:
-            default_text = load_sample(sample_file)
-            if not default_text:
-                st.warning(f"Sample file {sample_file} not found in tests/fixtures/")
-            st.session_state["text_area_content"] = default_text
-        else:
-            st.session_state["text_area_content"] = ""
-            
-    def text_changed():
-        st.session_state["text_area_content"] = st.session_state["text_area_widget"]
+    # Initialize text area state if empty
+    if "text_area_widget" not in st.session_state:
+        st.session_state["text_area_widget"] = ""
         
     input_text = st.text_area(
         "Enter or paste your text below:",
-        value=st.session_state.get("text_area_content", ""),
         height=200,
         placeholder="Type or paste text here, or select a sample from the sidebar...",
-        key="text_area_widget",
-        on_change=text_changed
+        key="text_area_widget"
     )
 else:
     uploaded = st.file_uploader("Upload .txt or .md file", type=["txt", "md"])
