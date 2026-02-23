@@ -42,6 +42,9 @@ try:
 except ImportError:
     NLTK_AVAILABLE = False
 
+# Module-level flag to avoid redundant NLTK data checks on every call
+_NLTK_DATA_READY = False
+
 
 @dataclass
 class TermStats:
@@ -71,10 +74,11 @@ class PipelineResult:
 
 
 def _ensure_nltk_data() -> None:
-    """Download required NLTK data."""
-    if not NLTK_AVAILABLE:
+    """Download required NLTK data. Only runs once per process via module-level flag."""
+    global _NLTK_DATA_READY
+    if _NLTK_DATA_READY or not NLTK_AVAILABLE:
         return
-        
+
     RESOURCE_PATHS = {
         "punkt": "tokenizers/punkt",
         "punkt_tab": "tokenizers/punkt_tab",
@@ -82,12 +86,12 @@ def _ensure_nltk_data() -> None:
         "wordnet": "corpora/wordnet",
         "averaged_perceptron_tagger": "taggers/averaged_perceptron_tagger",
     }
-    
     for name, path in RESOURCE_PATHS.items():
         try:
             nltk.data.find(path)
         except LookupError:
             nltk.download(name, quiet=True)
+    _NLTK_DATA_READY = True
 
 
 def _tokenize_tigrinya(text: str) -> List[str]:
@@ -134,7 +138,9 @@ def _lemmatize_tigrinya(tokens: List[str]) -> List[str]:
 
 
 def _get_wordnet_pos(treebank_tag: str) -> str:
-    """Map POS tag to first character used by WordNetLemmatizer"""
+    """Map POS tag to WordNet POS constant. Requires NLTK_AVAILABLE."""
+    if not NLTK_AVAILABLE:
+        return "n"  # safe fallback string, avoids NameError on wordnet.NOUN
     if treebank_tag.startswith('J'):
         return wordnet.ADJ
     elif treebank_tag.startswith('V'):
@@ -144,7 +150,7 @@ def _get_wordnet_pos(treebank_tag: str) -> str:
     elif treebank_tag.startswith('R'):
         return wordnet.ADV
     else:
-        return wordnet.NOUN # Default
+        return wordnet.NOUN  # Default
 
 def _lemmatize_english(tokens: List[str]) -> List[str]:
     """Lemmatize English tokens using WordNet and POS tagging."""
@@ -196,8 +202,9 @@ def _compute_distances_and_relevance(
         pos_list = positions.get(term, [0])
 
         dist_start = first / total if total > 0 else 0.0
-        # Symmetric distance: Distance from end based on where it FIRST appears
-        dist_end = (total - first - 1) / total if total > 0 else 0.0
+        # dist_end uses LAST occurrence — gives genuinely independent metric from dist_start.
+        # A term spanning the full doc has low dist_start AND low dist_end.
+        dist_end = (total - last - 1) / total if total > 0 else 0.0
         dist_end = max(0.0, dist_end)
 
         avg_pos = sum(pos_list) / len(pos_list)
@@ -227,7 +234,7 @@ def _compute_distances_and_relevance(
 
 def run_pipeline(
     text: str,
-    language: str = "tigrinya",
+    language: str = "english",
     remove_stopwords_flag: bool = True,
     lemmatize_flag: bool = True,
 ) -> PipelineResult:
