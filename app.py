@@ -179,26 +179,25 @@ input_mode = st.radio("Input mode", ["Text Area", "File Upload"], horizontal=Tru
 
 input_text = ""
 if input_mode == "Text Area":
-    # If a sample is selected, load it
-    sample_file = sample_options[selected_sample_name]
-    if sample_file:
-        default_text = load_sample(sample_file)
-        if not default_text:
-            st.warning(f"Sample file {sample_file} not found in tests/fixtures/")
-    else:
-        default_text = ""
-        
-    # Use session state to handle text area value only if user types
-    if "text_area_content" not in st.session_state or st.session_state.get("last_sample") != selected_sample_name:
-        st.session_state["text_area_content"] = default_text
+    # If the user selects a DIFFERENT sample, update the session state
+    if "last_sample" not in st.session_state or st.session_state["last_sample"] != selected_sample_name:
         st.session_state["last_sample"] = selected_sample_name
         
+        sample_file = sample_options[selected_sample_name]
+        if sample_file:
+            default_text = load_sample(sample_file)
+            if not default_text:
+                st.warning(f"Sample file {sample_file} not found in tests/fixtures/")
+            st.session_state["text_area_content"] = default_text
+        else:
+            st.session_state["text_area_content"] = ""
+            
     def text_changed():
         st.session_state["text_area_content"] = st.session_state["text_area_widget"]
         
     input_text = st.text_area(
         "Enter or paste your text below:",
-        value=st.session_state["text_area_content"],
+        value=st.session_state.get("text_area_content", ""),
         height=200,
         placeholder="Type or paste text here, or select a sample from the sidebar...",
         key="text_area_widget",
