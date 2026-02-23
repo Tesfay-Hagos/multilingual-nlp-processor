@@ -126,13 +126,34 @@ def _lemmatize_tigrinya(tokens: List[str]) -> List[str]:
     return list(tokens)
 
 
+from nltk.corpus import wordnet
+from nltk import pos_tag
+
+def _get_wordnet_pos(treebank_tag: str) -> str:
+    """Map POS tag to first character used by WordNetLemmatizer"""
+    if treebank_tag.startswith('J'):
+        return wordnet.ADJ
+    elif treebank_tag.startswith('V'):
+        return wordnet.VERB
+    elif treebank_tag.startswith('N'):
+        return wordnet.NOUN
+    elif treebank_tag.startswith('R'):
+        return wordnet.ADV
+    else:
+        return wordnet.NOUN # Default
+
 def _lemmatize_english(tokens: List[str]) -> List[str]:
-    """Lemmatize English tokens using WordNet."""
+    """Lemmatize English tokens using WordNet and POS tagging."""
     if not NLTK_AVAILABLE:
         return tokens
     _ensure_nltk_data()
     lemmatizer = WordNetLemmatizer()
-    return [lemmatizer.lemmatize(t) for t in tokens]
+    
+    # Tag tokens to get parts of speech
+    tagged_tokens = pos_tag(tokens)
+    
+    # Lemmatize based on POS
+    return [lemmatizer.lemmatize(word, _get_wordnet_pos(tag)) for word, tag in tagged_tokens]
 
 
 def _compute_distances_and_relevance(
