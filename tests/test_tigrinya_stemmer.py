@@ -40,8 +40,10 @@ def test_stemmer():
     check("ፈሊጡና → ፈሊጡ  (-ና 'us') [NS]",               _stem_tigrinya_word("ፈሊጡና"),   "ፈሊጡ")
 
     # ── 2pl.m / 2pl.f ────────────────────────────────────────────────────
-    check("ኣሎኹም → ኣሎ   (-ኹም 'you(pl.m)') [NS,Src4]",  _stem_tigrinya_word("ኣሎኹም"),   "ኣሎ")
-    check("ኣሎኽን → ኣሎ   (-ኽን 'you(pl.f)') [NS,Src4]",  _stem_tigrinya_word("ኣሎኽን"),   "ኣሎ")
+    check("ኣሎኹም → ኣሎ   (-ኹም 'you(pl.m)' labiovelar) [NS]", _stem_tigrinya_word("ኣሎኹም"),   "ኣሎ")
+    check("ኣሎኩም → ኣሎ   (-ኩም 'you(pl.m)' regular k) [NS]", _stem_tigrinya_word("ኣሎኩም"),   "ኣሎ")
+    check("ኣሎኽን → ኣሎ   (-ኽን 'you(pl.f)' labiovelar) [NS]", _stem_tigrinya_word("ኣሎኽን"),   "ኣሎ")
+    check("ኣሎኩን → ኣሎ   (-ኩን 'you(pl.f)' regular k) [NS]", _stem_tigrinya_word("ኣሎኩን"),   "ኣሎ")
 
     # ── 3sg.m object 'him' — three subject-conditioned forms ─────────────
     check("ፈሊጠዮ → ፈሊጠ  (-ዮ 'him' after I/you stem) [NS]", _stem_tigrinya_word("ፈሊጠዮ"), "ፈሊጠ")

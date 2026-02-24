@@ -135,8 +135,8 @@ def _remove_stopwords_english(tokens: List[str]) -> List[str]:
 #   -ካ / -ኻ   2sg.m obj  "you(m)"      ፈሊጡካ / ፈሊጡኻ   (dual spelling, both in use)
 #   -ኪ / -ኺ   2sg.f obj  "you(f)"      confirmed [NS]   (dual spelling, both in use)
 #   -ና        1pl  obj   "us"          ፈሊጡና
-#   -ኹም       2pl.m obj  "you(pl.m)"   ኣሎኹም             [NS + Src 4]
-#   -ኽን       2pl.f obj  "you(pl.f)"   ኣሎኽን             [NS + Src 4]
+#   -ኹም / -ኩም 2pl.m obj  "you(pl.m)"   ኣሎኹም / ኣሎኩም
+#   -ኽን / -ኩን 2pl.f obj  "you(pl.f)"   ኣሎኽን / ኣሎኩን
 #   -ዮ        3sg.m obj  "him" after I/you/we stems    ፈሊጠዮ  [NS]
 #   -ዎ        3sg.m obj  "him" after he/they stems     ፈሊጡዎ  [NS]
 #   -ቶ        3sg.m obj  "him" after she stem          ፈሊጣቶ  [NS]  ← ቶ = U+1276
@@ -159,7 +159,9 @@ _TIGRINYA_SUFFIXES: List[tuple] = [
     ("ታት", 2),   # noun plural            ከባቢ  → ከባቢታት   [NS, Src 3,4]
     ("ዎም", 2),   # 3pl.m obj "them(m)"    ፈሊጡ → ፈሊጡዎም   [NS]
     ("ኹም", 2),   # 2pl.m obj "you(pl.m)"  ኣሎ  → ኣሎኹም    [NS, Src 4]
+    ("ኩም", 2),   # 2pl.m obj "you(pl.m)" (regular k alt)
     ("ኽን", 2),   # 2pl.f obj "you(pl.f)"  ኣሎ  → ኣሎኽን    [NS, Src 4]
+    ("ኩን", 2),   # 2pl.f obj "you(pl.f)" (regular k alt)
     # ── 2-syllable suffixes ───────────────────────────────────────────────
     ("ኣት", 2),   # noun plural (consonant-final stem)      [Src 3,4]
     ("ኻ",  2),   # 2sg.m obj "you(m)" labiovelar  ፈሊጡኻ   [NS]
