@@ -69,8 +69,8 @@ class TestTigrinyaPipeline:
     def test_tigrinya_lemmatization_reduces_suffixes(self):
         """Requirement 2.2: Lemmatize Tigrinya tokens by stripping common suffixes."""
         # ሰብካ (man + your) -> ሰብ
-        # ገዛኹም (house + your-pl) - using ኩም variant
-        text = "ሰብካ ገዛኩም"
+        # ገዛኹም (house + your-pl) - using correct ኹም variant
+        text = "ሰብካ ገዛኹም"
         r = run_pipeline(text, language="tigrinya", remove_stopwords_flag=False, lemmatize_flag=True)
         assert "ሰብ" in r.lemmas
         assert "ገዛ" in r.lemmas
