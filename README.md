@@ -1,87 +1,69 @@
-# NLP Graphic Tool — Research Assignment Option 2
+# 📊 NLP Graphic Tool
 
-A modern Python application implementing a **graphic tool** for document processing with full support for **Tigrinya (ትግርኛ)** and **English** text.
+A modern NLP processing tool for **Tigrinya (ትግርኛ)** and **English** text. 
 
-## Professor Requirements — All Implemented ✅
+**🚀 Live Demo:** [https://weldegebriel-tesfayhagos-nlp.streamlit.app/](https://weldegebriel-tesfayhagos-nlp.streamlit.app/)
 
-| # | Requirement | Implementation |
-|---|-------------|----------------|
-| **2.1** | Eliminate stopwords | `tigrinya-nlp` (Tigrinya) / NLTK (English) |
-| **2.2** | Lemmatize terms | WordNet (English) / Identity (Tigrinya*) |
-| **2.3** | Compute frequencies | `Counter` on tokenized/lemmatized terms |
-| **2.4** | Measure distances from strategic points (start and end) | `first_pos/total`, `(total-last_pos)/total` per term |
-| **2.5** | Compute compound relevance indices (50% frequency + 50% earliness) | `0.5 * freq_score + 0.5 * earliness_score` |
+---
 
-*Tigrinya lemmatization: No standard tool exists; identity mapping used. Can be extended with rule-based stemmer.
+## 📖 How to Use
 
-## Project Structure
+1. **Access the App:** Open the [Live Demo](https://weldegebriel-tesfayhagos-nlp.streamlit.app/) or run locally.
+2. **Input Text:** 
+   - Paste your text directly into the **Text Area**.
+   - Or **Upload** a `.txt` or `.md` file.
+   - You can also load built-in **Tigrinya/English samples** from the sidebar.
+3. **Configure Pipeline:** (Optional) Use the sidebar to toggle:
+   - Language Auto-detection
+   - Stopword Elimination (Requirement 2.1)
+   - Lemmatization (Requirement 2.2)
+4. **Analyze:** Click **🚀 Analyze Document** to process the text.
+5. **Explore Results:** Navigate through the interactive tabs:
+   - **Frequencies:** View term counts (Requirement 2.3).
+   - **Distances:** Analyze term positions relative to document boundaries (Requirement 2.4).
+   - **Compound Relevance:** See weighted importance scores (Requirement 2.5).
+   - **Visualizations:** Interactive charts and pie plots.
+6. **Export:** Download your results as **CSV** or **JSON**.
 
-```
-nlp_graphic_tool/
-├── app.py              # Streamlit graphic UI
-├── nlp_pipeline.py     # Core NLP logic (all 5 requirements)
-├── requirements.txt    # Dependencies
-└── README.md           # This file
-```
+---
 
-## Installation
+## 🖼️ User Interface
+
+### Analysis Overview
+![Dashboard Overview](doc/Screenshot%20from%202026-02-27%2000-21-22.png)
+
+### Interactive Insights
+![Interactive Charts](doc/Screenshot%20from%202026-02-27%2000-21-42.png)
+
+---
+
+## 🛠️ Local Setup
+
+If you wish to run the tool locally:
 
 ```bash
+# Clone the repository
+git clone <your-repo-url>
 cd nlp_graphic_tool
+
+# Install dependencies
 pip install -r requirements.txt
-```
 
-**Note:** For Tigrinya support, `tigrinya-nlp` is required. For English, `nltk` is required. Both are in `requirements.txt`.
-
-## Run the Application
-
-```bash
+# Run the app
 streamlit run app.py
 ```
 
-Then open http://localhost:8501 in your browser.
+---
 
-## Features
+## 📝 Features & Requirements
 
-- **Dual language:** Tigrinya and English
-- **Input modes:** Text area or file upload (.txt, .md)
-- **Interactive tabs:** Frequencies, Distances, Compound Relevance, Visualizations
-- **Charts:** Bar charts, scatter plots, pie charts (Plotly)
-- **Export:** Download results as CSV
-- **Modern UI:** Dark theme, responsive layout
+- ✅ **Stopword Removal (2.1):** Support for English and Tigrinya.
+- ✅ **Lemmatization (2.2):** Standard English lemmatizer.
+- ✅ **Frequencies (2.3):** Full term count calculations.
+- ✅ **Distance Metrics (2.4):** Early/Late position analysis.
+- ✅ **Compound Relevance (2.5):** 50% Frequency + 50% Earliness.
+- 🌍 **Dual Language:** Smart detection of Tigrinya and English.
+- 📊 **Visualizations:** Powered by Plotly.
 
-## Technical Details
-
-### Distance from Strategic Points (2.4)
-
-For each unique term:
-- **Distance from start:** `first_occurrence_position / total_tokens`
-- **Distance from end:** `(total_tokens - last_occurrence_position) / total_tokens`
-
-### Compound Relevance (2.5)
-
-- **Frequency score:** `term_freq / max_freq` (normalized 0–1)
-- **Earliness score:** `1 - (avg_position / total_tokens)` — earlier terms score higher
-- **Compound relevance:** `0.5 × freq_score + 0.5 × earliness_score`
-
-## Deploy on Render (Free)
-
-1. Push this project to GitHub.
-2. Go to [render.com](https://render.com) → **New** → **Web Service**.
-3. Connect your repo and select `nlp_graphic_tool` as the root (or set it in settings).
-4. Render will use `render.yaml` if present, or set manually:
-   - **Build:** `pip install -r requirements.txt`
-   - **Start:** `streamlit run app.py --server.port $PORT --server.address 0.0.0.0 --server.headless true`
-5. Deploy. Free tier: 750 hrs/month; service sleeps after ~15 min inactivity.
-
-## Dependencies
-
-- `streamlit` — Web UI
-- `pandas` — Data tables
-- `plotly` — Interactive charts
-- `tigrinya-nlp` — Tigrinya preprocessing (stopwords, tokenization)
-- `nltk` — English tokenization, stopwords, lemmatization
-
-## License
-
-MIT — For academic submission.
+---
+*Developed for NLP Research Assignment Option 2.*
