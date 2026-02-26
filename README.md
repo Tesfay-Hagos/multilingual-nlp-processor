@@ -30,10 +30,10 @@ A modern NLP processing tool for **Tigrinya (ትግርኛ)** and **English** tex
 ## 🖼️ User Interface
 
 ### Analysis Overview
-![Dashboard Overview](doc/Screenshot%20from%202026-02-27%2000-21-22.png)
+![Dashboard Overview](doc/screenshot_overview.png)
 
 ### Interactive Insights
-![Interactive Charts](doc/Screenshot%20from%202026-02-27%2000-21-42.png)
+![Interactive Charts](doc/screenshot_insights.png)
 
 ---
 
